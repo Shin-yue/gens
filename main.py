@@ -1,11 +1,7 @@
 from logging import basicConfig, warning
 
-from pyromod import listen
-from pyromod.exceptions import ListenerTimeout
-from pyromod.helpers import ikb
-
 from pyrogram import filters, Client
-from pyrogram.types import Message, CallbackQuery
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 from pyrogram.errors import(
     FloodWait,
     PhoneNumberInvalid,
@@ -35,11 +31,16 @@ bot = Bot()
 
 @bot.on_message(filters.private & filters.command("start"))
 async def start(_, msg: Message):
-    button = ikb([
-        [("Pyrogram", "pyrogram"), ("Telethon", "telethon")],
-        [("Source Code", "https://github.com/ugorwx/gens", "url")]
-    ])
-    await msg.reply_photo(photo="./photo.png", reply_markup=button)
+    button = [
+        [
+            InlineKeyboardButton("Pyrogram", callback_data="pyrogram"), 
+            InlineKeyboardButton("Telethon", callback_data="telethon")
+        ],
+        [
+            InlineKeyboardButton("Source Code", url="https://github.com/ugorwx/gens")
+        ]
+    ]
+    await msg.reply_photo(photo="./photo.png", reply_markup=InlineKeyboardMarkup(button))
 
 
 async def generate(bot: Bot, msg: Message, telethon=False):
@@ -82,7 +83,7 @@ async def generate(bot: Bot, msg: Message, telethon=False):
             filters=filters.text,
             timeout=300
         )
-    except ListenerTimeout:
+    except:
         await msg.reply("Time limit reached of 300s.\n\nPress /start to create again.")
         return await client.disconnect()
     if await cancel_task(msg, phone_code.text):
@@ -106,7 +107,7 @@ async def generate(bot: Bot, msg: Message, telethon=False):
                 filters=filters.text,
                 timeout=300
             )
-        except ListenerTimeout:
+        except:
             await msg.reply("Time limit reached of 300s.\n\nPress /start to create again.")
             return await client.disconnect()
         if await cancel_task(msg, password.text):
